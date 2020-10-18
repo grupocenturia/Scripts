@@ -1,0 +1,30 @@
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblMenu_detail') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblMenu_detail
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblMenu_detail
+	(
+	@MenuId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	SELECT Name,
+		Enabled,
+		ModuleId
+		FROM Administrator.tblMenu
+		WHERE MenuId = @MenuId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblMenu_detail TO CenturiaUser
+GO
+
