@@ -267,10 +267,10 @@ GO
 
 
 /* ---------------------------------------------------------------------- */
-/* Add table "tblStore"                                                   */
+/* Add table "CNTDB00.Administrator.tblStore"                             */
 /* ---------------------------------------------------------------------- */
 
-CREATE TABLE [tblStore] (
+CREATE TABLE [CNTDB00].[Administrator].[tblStore] (
     [StoreId] INTEGER NOT NULL,
     [Name] VARCHAR(100) NOT NULL,
     [SystemDate] DATETIME NOT NULL,
@@ -632,10 +632,10 @@ GO
 
 
 /* ---------------------------------------------------------------------- */
-/* Add table "tblLicense"                                                 */
+/* Add table "CNTDB00.Administrator.tblLicense"                           */
 /* ---------------------------------------------------------------------- */
 
-CREATE TABLE [tblLicense] (
+CREATE TABLE [CNTDB00].[Administrator].[tblLicense] (
     [LicenseId] INTEGER NOT NULL,
     [CompanyId] INTEGER,
     [StoreId] INTEGER,
@@ -823,18 +823,18 @@ ALTER TABLE [CNTDB00].[Administrator].[tblProfileOption] ADD CONSTRAINT [fk_tblP
 GO
 
 
-ALTER TABLE [tblLicense] ADD CONSTRAINT [fk_tblLicense_tblUser] 
+ALTER TABLE [CNTDB00].[Administrator].[tblLicense] ADD CONSTRAINT [fk_tblLicense_tblUser] 
     FOREIGN KEY ([UserId]) REFERENCES [CNTDB00].[Administrator].[tblUser] ([UserId])
 GO
 
 
-ALTER TABLE [tblLicense] ADD CONSTRAINT [fk_tblLicense_tblCompany] 
+ALTER TABLE [CNTDB00].[Administrator].[tblLicense] ADD CONSTRAINT [fk_tblLicense_tblCompany] 
     FOREIGN KEY ([CompanyId]) REFERENCES [CNTDB00].[Administrator].[tblCompany] ([CompanyId])
 GO
 
 
-ALTER TABLE [tblLicense] ADD CONSTRAINT [fk_tblLicense_tblStore] 
-    FOREIGN KEY ([StoreId]) REFERENCES [tblStore] ([StoreId])
+ALTER TABLE [CNTDB00].[Administrator].[tblLicense] ADD CONSTRAINT [fk_tblLicense_tblStore] 
+    FOREIGN KEY ([StoreId]) REFERENCES [CNTDB00].[Administrator].[tblStore] ([StoreId])
 GO
 
 
