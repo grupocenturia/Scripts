@@ -374,14 +374,23 @@ GO
 CREATE PROCEDURE Administrator.sp_ins_tblUser
 	(
 	@Name varchar(100),
-	@UserName varchar(100)
+	@UserName varchar(100),
+	@Password varchar(100)
 	)
 AS
 BEGIN
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 
-	DECLARE @UserId int
+	DECLARE @UserId int,
+		@CryptedPassword varbinary(MAX)
+
+	OPEN SYMMETRIC KEY CenturiaKey
+		DECRYPTION BY CERTIFICATE CenturiaCert
+
+	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), @Password)
+
+	CLOSE SYMMETRIC KEY CenturiaKey
 
 	BEGIN TRANSACTION
 		SELECT @UserId = ISNULL(MAX(UserId), 0) + 1
@@ -392,6 +401,7 @@ BEGIN
 			UserId,
 			Name,
 			UserName,
+			Password,
 			SystemDate,
 			Enabled
 			)
@@ -400,6 +410,7 @@ BEGIN
 			@UserId,
 			@Name,
 			@UserName,
+			@CryptedPassword,
 			GETDATE(),
 			1
 			)
@@ -1010,17 +1021,66 @@ AS
 BEGIN
 	SET NOCOUNT ON
 
-	SELECT UserId,
-		Name
+	DECLARE @UserId int,
+		@Name varchar(100)
+
+	SELECT @UserId = UserId,
+		@Name = Name
 		FROM Administrator.tblUser
 		WHERE UserName = @UserName AND
 		Enabled = 1
+
+	SELECT ISNULL(@UserId, 0) AS UserId,
+		ISNULL(@Name, '') AS Name
 END
 
 RETURN 0
 GO
 
 GRANT EXECUTE ON Administrator.sp_sel_tblUser_check TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblUser_checkPassword') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblUser_checkPassword
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblUser_checkPassword
+(
+	@UserName varchar(100),
+	@Password varchar(100)
+)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	DECLARE @UserId int,
+		@Name varchar(100)
+
+	OPEN SYMMETRIC KEY CenturiaKey
+		DECRYPTION BY CERTIFICATE CenturiaCert
+
+	SELECT @UserId = UserId,
+		@Name = Name
+		FROM Administrator.tblUser
+		WHERE UserName = @UserName AND
+		CAST(DECRYPTBYKEY([Password]) AS varchar) = @Password AND
+		Enabled = 1
+
+	CLOSE SYMMETRIC KEY CenturiaKey
+
+	SELECT ISNULL(@UserId, 0) AS UserId,
+		ISNULL(@Name, '') AS Name
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblUser_checkPassword TO CenturiaUser
 GO
 
 USE CNTDB00
@@ -1338,5 +1398,47 @@ RETURN 0
 GO
 
 GRANT EXECUTE ON Administrator.sp_upt_tblUser TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_upt_tblUser_password') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_upt_tblUser_password
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_upt_tblUser_password
+	(
+	@UserId int,
+	@Password varchar(100)
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	DECLARE @CryptedPassword varbinary(MAX)
+
+	OPEN SYMMETRIC KEY CenturiaKey
+		DECRYPTION BY CERTIFICATE CenturiaCert
+
+	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), @Password)
+
+	CLOSE SYMMETRIC KEY CenturiaKey
+
+
+	UPDATE Administrator.tblUser SET
+		Password = @CryptedPassword,
+		SystemDate = GETDATE()
+		WHERE UserId = @UserId
+
+	SELECT @UserId AS UserId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_upt_tblUser_password TO CenturiaUser
 GO
 

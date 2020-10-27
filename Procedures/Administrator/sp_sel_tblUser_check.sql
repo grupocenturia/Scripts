@@ -15,11 +15,17 @@ AS
 BEGIN
 	SET NOCOUNT ON
 
-	SELECT UserId,
-		Name
+	DECLARE @UserId int,
+		@Name varchar(100)
+
+	SELECT @UserId = UserId,
+		@Name = Name
 		FROM Administrator.tblUser
 		WHERE UserName = @UserName AND
 		Enabled = 1
+
+	SELECT ISNULL(@UserId, 0) AS UserId,
+		ISNULL(@Name, '') AS Name
 END
 
 RETURN 0

@@ -10,14 +10,23 @@ GO
 CREATE PROCEDURE Administrator.sp_ins_tblUser
 	(
 	@Name varchar(100),
-	@UserName varchar(100)
+	@UserName varchar(100),
+	@Password varchar(100)
 	)
 AS
 BEGIN
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 
-	DECLARE @UserId int
+	DECLARE @UserId int,
+		@CryptedPassword varbinary(MAX)
+
+	OPEN SYMMETRIC KEY CenturiaKey
+		DECRYPTION BY CERTIFICATE CenturiaCert
+
+	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), @Password)
+
+	CLOSE SYMMETRIC KEY CenturiaKey
 
 	BEGIN TRANSACTION
 		SELECT @UserId = ISNULL(MAX(UserId), 0) + 1
@@ -28,6 +37,7 @@ BEGIN
 			UserId,
 			Name,
 			UserName,
+			Password,
 			SystemDate,
 			Enabled
 			)
@@ -36,6 +46,7 @@ BEGIN
 			@UserId,
 			@Name,
 			@UserName,
+			@CryptedPassword,
 			GETDATE(),
 			1
 			)

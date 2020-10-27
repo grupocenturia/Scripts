@@ -130,6 +130,31 @@ GO
 CREATE SCHEMA Accounting
 GO
 
+
+--CERT
+USE CNTDB00
+GO
+
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'GrupoCenturia2020--'
+GO
+
+CREATE CERTIFICATE CenturiaCert
+	WITH SUBJECT = 'Centuria'
+GO
+
+CREATE SYMMETRIC KEY CenturiaKey 
+	WITH ALGORITHM = AES_256
+	ENCRYPTION BY CERTIFICATE CenturiaCert
+GO
+
+GRANT VIEW DEFINITION ON SYMMETRIC KEY::CenturiaKey TO CenturiaUser
+GO
+
+GRANT CONTROL ON CERTIFICATE::CenturiaCert TO CenturiaUser
+GO
+
+
+
 /* ---------------------------------------------------------------------- */
 /* Add tables                                                             */
 /* ---------------------------------------------------------------------- */
