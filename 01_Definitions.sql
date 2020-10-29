@@ -153,8 +153,6 @@ GO
 GRANT CONTROL ON CERTIFICATE::CenturiaCert TO CenturiaUser
 GO
 
-
-
 /* ---------------------------------------------------------------------- */
 /* Add tables                                                             */
 /* ---------------------------------------------------------------------- */
@@ -519,6 +517,24 @@ GO
 
 
 /* ---------------------------------------------------------------------- */
+/* Add table "CNTDB00.Core.tblParameter"                                  */
+/* ---------------------------------------------------------------------- */
+
+CREATE TABLE [CNTDB00].[Core].[tblParameter] (
+    [ParameterId] INTEGER NOT NULL,
+    [DataTypeId] INTEGER NOT NULL,
+    [Name] VARCHAR(100) NOT NULL,
+    [Length] INTEGER NOT NULL,
+    [Decimals] INTEGER NOT NULL,
+    [Format] VARCHAR(100) NOT NULL,
+    [SystemDate] DATETIME NOT NULL,
+    [Enabled] BIT NOT NULL,
+    CONSTRAINT [pk_tblParameter] PRIMARY KEY ([ParameterId])
+)
+GO
+
+
+/* ---------------------------------------------------------------------- */
 /* Add table "CNTDB01.Accounting.tblAccount"                              */
 /* ---------------------------------------------------------------------- */
 
@@ -632,10 +648,11 @@ GO
 
 CREATE TABLE [CNTDB00].[Administrator].[tblSetting] (
     [SettingId] INTEGER NOT NULL,
-    [DataTypeId] INTEGER NOT NULL,
+    [ParameterId] INTEGER NOT NULL,
     [Name] VARCHAR(100) NOT NULL,
-    [Value] VARCHAR(200) NOT NULL,
-    [Format] VARCHAR(100) NOT NULL,
+    [Description] VARCHAR(max) NOT NULL,
+    [Variable] VARCHAR(100) NOT NULL,
+    [Value] VARCHAR(max) NOT NULL,
     [SystemDate] DATETIME NOT NULL,
     [Enabled] BIT NOT NULL,
     CONSTRAINT [pk_tblSetting] PRIMARY KEY ([SettingId])
@@ -818,8 +835,8 @@ ALTER TABLE [CNTDB00].[Administrator].[tblLog] ADD CONSTRAINT [fk_tblLog_tblActi
 GO
 
 
-ALTER TABLE [CNTDB00].[Administrator].[tblSetting] ADD CONSTRAINT [fk_tblSetting_tblDataType] 
-    FOREIGN KEY ([DataTypeId]) REFERENCES [CNTDB00].[Core].[tblDataType] ([DataTypeId])
+ALTER TABLE [CNTDB00].[Administrator].[tblSetting] ADD CONSTRAINT [fk_tblSetting_tblParameter] 
+    FOREIGN KEY ([ParameterId]) REFERENCES [CNTDB00].[Core].[tblParameter] ([ParameterId])
 GO
 
 
@@ -915,5 +932,10 @@ GO
 
 ALTER TABLE [CNTDB01].[Accounting].[tblJournalSummaryDetails] ADD CONSTRAINT [fk_tblJournalSummaryDetails_tblJournal] 
     FOREIGN KEY ([Journald]) REFERENCES [CNTDB01].[Accounting].[tblJournal] ([Journald])
+GO
+
+
+ALTER TABLE [CNTDB00].[Core].[tblParameter] ADD CONSTRAINT [fk_tblParameter_tblDataType] 
+    FOREIGN KEY ([DataTypeId]) REFERENCES [CNTDB00].[Core].[tblDataType] ([DataTypeId])
 GO
 
