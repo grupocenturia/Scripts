@@ -168,7 +168,9 @@ GO
 
 CREATE PROCEDURE Administrator.sp_ins_tblModule
 	(
-	@Name varchar(100)
+	@Name varchar(100),
+	@Description varchar(MAX),
+	@Executable varchar(100)
 	)
 AS
 BEGIN
@@ -185,6 +187,8 @@ BEGIN
 			(
 			ModuleId,
 			Name,
+			Description,
+			Executable,
 			SystemDate,
 			Enabled
 			)
@@ -192,6 +196,8 @@ BEGIN
 			(
 			@ModuleId,
 			@Name,
+			@Description,
+			@Executable,
 			GETDATE(),
 			1
 			)
@@ -729,6 +735,8 @@ BEGIN
 	IF @Enabled = 0
 	BEGIN 
 		SELECT Name,
+			Description,
+			Executable,
 			Enabled,
 			ModuleId
 			FROM Administrator.tblModule
@@ -737,6 +745,8 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT Name,
+			Description,
+			Executable,
 			ModuleId
 			FROM Administrator.tblModule
 			WHERE Enabled = 1
@@ -768,6 +778,8 @@ BEGIN
 	SET NOCOUNT ON
 	
 	SELECT Name,
+		Description,
+		Executable,
 		Enabled
 		FROM Administrator.tblModule
 		WHERE ModuleId = @ModuleId
@@ -1152,10 +1164,10 @@ BEGIN
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
 	SELECT @UserId = UserId,
-		@Name = Name
+		@Name = Name 
 		FROM Administrator.tblUser
-		WHERE UserName = @UserName AND
-		CAST(DECRYPTBYKEY([Password]) AS varchar) = @Password AND
+		WHERE UserName COLLATE Latin1_General_CS_AS = @UserName AND
+		CAST(DECRYPTBYKEY([Password]) AS varchar) COLLATE Latin1_General_CS_AS = @Password AND
 		Enabled = 1
 
 	CLOSE SYMMETRIC KEY CenturiaKey
@@ -1322,6 +1334,8 @@ CREATE PROCEDURE Administrator.sp_upt_tblModule
 	(
 	@ModuleId int,
 	@Name varchar(100),
+	@Description varchar(MAX),
+	@Executable varchar(100),
 	@Enabled bit
 	)
 AS
@@ -1330,6 +1344,8 @@ BEGIN
 	
 	UPDATE Administrator.tblModule SET
 		Name = @Name,
+		Description = @Description,
+		Executable = @Executable,
 		SystemDate = GETDATE(),
 		Enabled = @Enabled
 		WHERE ModuleId = @ModuleId

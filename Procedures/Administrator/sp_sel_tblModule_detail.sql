@@ -16,6 +16,8 @@ BEGIN
 	SET NOCOUNT ON
 	
 	SELECT Name,
+		Description,
+		Executable,
 		Enabled
 		FROM Administrator.tblModule
 		WHERE ModuleId = @ModuleId

@@ -9,7 +9,9 @@ GO
 
 CREATE PROCEDURE Administrator.sp_ins_tblModule
 	(
-	@Name varchar(100)
+	@Name varchar(100),
+	@Description varchar(MAX),
+	@Executable varchar(100)
 	)
 AS
 BEGIN
@@ -26,6 +28,8 @@ BEGIN
 			(
 			ModuleId,
 			Name,
+			Description,
+			Executable,
 			SystemDate,
 			Enabled
 			)
@@ -33,6 +37,8 @@ BEGIN
 			(
 			@ModuleId,
 			@Name,
+			@Description,
+			@Executable,
 			GETDATE(),
 			1
 			)

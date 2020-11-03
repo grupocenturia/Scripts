@@ -23,10 +23,10 @@ BEGIN
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
 	SELECT @UserId = UserId,
-		@Name = Name
+		@Name = Name 
 		FROM Administrator.tblUser
-		WHERE UserName = @UserName AND
-		CAST(DECRYPTBYKEY([Password]) AS varchar) = @Password AND
+		WHERE UserName COLLATE Latin1_General_CS_AS = @UserName AND
+		CAST(DECRYPTBYKEY([Password]) AS varchar) COLLATE Latin1_General_CS_AS = @Password AND
 		Enabled = 1
 
 	CLOSE SYMMETRIC KEY CenturiaKey

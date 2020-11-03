@@ -253,8 +253,10 @@ GO
 CREATE TABLE [CNTDB00].[Administrator].[tblModule] (
     [ModuleId] INTEGER NOT NULL,
     [Name] VARCHAR(100) NOT NULL,
+    [Description] VARCHAR(max) NOT NULL,
+    [Executable] VARCHAR(100) NOT NULL,
     [SystemDate] DATETIME NOT NULL,
-    [Enabled] BIT,
+    [Enabled] BIT NOT NULL,
     CONSTRAINT [pk_tblModule] PRIMARY KEY ([ModuleId])
 )
 GO
@@ -517,24 +519,6 @@ GO
 
 
 /* ---------------------------------------------------------------------- */
-/* Add table "CNTDB00.Core.tblParameter"                                  */
-/* ---------------------------------------------------------------------- */
-
-CREATE TABLE [CNTDB00].[Core].[tblParameter] (
-    [ParameterId] INTEGER NOT NULL,
-    [DataTypeId] INTEGER NOT NULL,
-    [Name] VARCHAR(100) NOT NULL,
-    [Length] INTEGER NOT NULL,
-    [Decimals] INTEGER NOT NULL,
-    [Format] VARCHAR(100) NOT NULL,
-    [SystemDate] DATETIME NOT NULL,
-    [Enabled] BIT NOT NULL,
-    CONSTRAINT [pk_tblParameter] PRIMARY KEY ([ParameterId])
-)
-GO
-
-
-/* ---------------------------------------------------------------------- */
 /* Add table "CNTDB01.Accounting.tblAccount"                              */
 /* ---------------------------------------------------------------------- */
 
@@ -643,24 +627,6 @@ GO
 
 
 /* ---------------------------------------------------------------------- */
-/* Add table "CNTDB00.Administrator.tblSetting"                           */
-/* ---------------------------------------------------------------------- */
-
-CREATE TABLE [CNTDB00].[Administrator].[tblSetting] (
-    [SettingId] INTEGER NOT NULL,
-    [ParameterId] INTEGER NOT NULL,
-    [Name] VARCHAR(100) NOT NULL,
-    [Description] VARCHAR(max) NOT NULL,
-    [Variable] VARCHAR(100) NOT NULL,
-    [Value] VARCHAR(max) NOT NULL,
-    [SystemDate] DATETIME NOT NULL,
-    [Enabled] BIT NOT NULL,
-    CONSTRAINT [pk_tblSetting] PRIMARY KEY ([SettingId])
-)
-GO
-
-
-/* ---------------------------------------------------------------------- */
 /* Add table "CNTDB00.Administrator.tblProfileOption"                     */
 /* ---------------------------------------------------------------------- */
 
@@ -688,6 +654,24 @@ CREATE TABLE [CNTDB00].[Administrator].[tblLicense] (
     [SystemDate] DATETIME NOT NULL,
     [Enabled] BIT NOT NULL,
     CONSTRAINT [pk_tblLicense] PRIMARY KEY ([LicenseId])
+)
+GO
+
+
+/* ---------------------------------------------------------------------- */
+/* Add table "CNTDB00.Core.tblParameter"                                  */
+/* ---------------------------------------------------------------------- */
+
+CREATE TABLE [CNTDB00].[Core].[tblParameter] (
+    [ParameterId] INTEGER NOT NULL,
+    [DataTypeId] INTEGER NOT NULL,
+    [Name] VARCHAR(100) NOT NULL,
+    [Length] INTEGER NOT NULL,
+    [Decimals] INTEGER NOT NULL,
+    [Format] VARCHAR(100) NOT NULL,
+    [SystemDate] DATETIME NOT NULL,
+    [Enabled] BIT NOT NULL,
+    CONSTRAINT [pk_tblParameter] PRIMARY KEY ([ParameterId])
 )
 GO
 
@@ -737,6 +721,24 @@ CREATE TABLE [CNTDB01].[Accounting].[tblJournalSummaryDetails] (
     [JournalSummaryld] INTEGER NOT NULL,
     [Journald] INTEGER UNIQUE NOT NULL,
     CONSTRAINT [pk_tblJournalSummaryDetails] PRIMARY KEY ([JournalSummaryld], [Journald])
+)
+GO
+
+
+/* ---------------------------------------------------------------------- */
+/* Add table "CNTDB00.Administrator.tblSetting"                           */
+/* ---------------------------------------------------------------------- */
+
+CREATE TABLE [CNTDB00].[Administrator].[tblSetting] (
+    [SettingId] INTEGER NOT NULL,
+    [ParameterId] INTEGER NOT NULL,
+    [Name] VARCHAR(100) NOT NULL,
+    [Description] VARCHAR(max) NOT NULL,
+    [Variable] VARCHAR(100) NOT NULL,
+    [Value] VARCHAR(max) NOT NULL,
+    [SystemDate] DATETIME NOT NULL,
+    [Enabled] BIT NOT NULL,
+    CONSTRAINT [pk_tblSetting] PRIMARY KEY ([SettingId])
 )
 GO
 
@@ -880,6 +882,11 @@ ALTER TABLE [CNTDB00].[Administrator].[tblLicense] ADD CONSTRAINT [fk_tblLicense
 GO
 
 
+ALTER TABLE [CNTDB00].[Core].[tblParameter] ADD CONSTRAINT [fk_tblParameter_tblDataType] 
+    FOREIGN KEY ([DataTypeId]) REFERENCES [CNTDB00].[Core].[tblDataType] ([DataTypeId])
+GO
+
+
 ALTER TABLE [CNTDB00].[Administrator].[tblCompanyLogo] ADD CONSTRAINT [fk_tblCompanyLogo_tblCompany] 
     FOREIGN KEY ([CompanyId]) REFERENCES [CNTDB00].[Administrator].[tblCompany] ([CompanyId])
 GO
@@ -932,10 +939,5 @@ GO
 
 ALTER TABLE [CNTDB01].[Accounting].[tblJournalSummaryDetails] ADD CONSTRAINT [fk_tblJournalSummaryDetails_tblJournal] 
     FOREIGN KEY ([Journald]) REFERENCES [CNTDB01].[Accounting].[tblJournal] ([Journald])
-GO
-
-
-ALTER TABLE [CNTDB00].[Core].[tblParameter] ADD CONSTRAINT [fk_tblParameter_tblDataType] 
-    FOREIGN KEY ([DataTypeId]) REFERENCES [CNTDB00].[Core].[tblDataType] ([DataTypeId])
 GO
 

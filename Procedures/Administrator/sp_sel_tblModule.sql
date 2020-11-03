@@ -18,6 +18,8 @@ BEGIN
 	IF @Enabled = 0
 	BEGIN 
 		SELECT Name,
+			Description,
+			Executable,
 			Enabled,
 			ModuleId
 			FROM Administrator.tblModule
@@ -26,6 +28,8 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT Name,
+			Description,
+			Executable,
 			ModuleId
 			FROM Administrator.tblModule
 			WHERE Enabled = 1
