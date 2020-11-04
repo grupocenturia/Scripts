@@ -9,7 +9,6 @@ GO
 
 CREATE PROCEDURE Administrator.sp_sel_tblProfileUser
 	(
-	@UserId int,
 	@CompanyId int,
 	@ProfileId int
 	)
@@ -17,21 +16,32 @@ AS
 BEGIN
 	SET NOCOUNT ON
 	
-		SELECT tblUser.Name AS "User",
-			tblProfile.Name AS Profile,
-			tblCompany.Name AS Company,
-			tblProfileUser.ProfileId
+	SELECT CAST(Query1.Selected AS bit) AS Selected,
+		tblUser.Name,
+		Query1.UserId
+		FROM
+		(
+		SELECT 1 AS Selected,
+			UserId
 			FROM Administrator.tblProfileUser
-			LEFT JOIN Administrator.tblUser ON
-			tblProfileUser.UserId = tblUser.UserId
-			RIGHT JOIN Administrator.tblProfile ON
-			tblProfileUser.ProfileId = tblProfile.ProfileId
-			JOIN Administrator.tblCompany ON
-			tblProfileUser.CompanyId = tblCompany.CompanyId
-			WHERE tblUser.UserId = @UserId AND
-			tblCompany.CompanyId = @CompanyId AND
-			tblProfile.ProfileId = @ProfileId
-			ORDER BY 1
+			WHERE CompanyId = @CompanyId AND
+			ProfileId = @ProfileId
+		UNION ALL
+		SELECT 0,
+			UserId
+			FROM Administrator.tblUser
+			WHERE UserId NOT IN
+			(
+			SELECT UserId
+				FROM Administrator.tblProfileUser
+				WHERE CompanyId = @CompanyId AND
+				ProfileId = @ProfileId
+			)
+		) AS Query1
+		JOIN Administrator.tblUser ON
+		Query1.UserId = tblUser.UserId
+		WHERE tblUser.Enabled = 1
+		ORDER BY 1 DESC, 2
 END
 
 RETURN 0

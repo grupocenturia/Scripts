@@ -246,6 +246,55 @@ GO
 USE CNTDB01
 GO
 
+IF OBJECT_ID('Accounting.sp_ins_tblPeriodStatus') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Accounting.sp_ins_tblPeriodStatus
+END
+GO
+
+CREATE PROCEDURE Accounting.sp_ins_tblPeriodStatus
+	(
+	@Name varchar(100)
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	
+	DECLARE @PeriodStatusId int
+	
+	BEGIN TRANSACTION
+		SELECT @PeriodStatusId = ISNULL(MAX(PeriodStatusId), 0) + 1
+			FROM Accounting.tblPeriodStatus
+			
+		INSERT INTO Accounting.tblPeriodStatus
+			(
+			PeriodStatusId,
+			Name,
+			SystemDate,
+			Enabled
+			)
+			VALUES
+			(
+			@PeriodStatusId,
+			@Name,
+			GETDATE(),
+			1
+			)
+	COMMIT TRANSACTION
+	
+	SELECT @PeriodStatusId AS PeriodStatusId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Accounting.sp_ins_tblPeriodStatus TO CenturiaUser
+GO
+
+USE CNTDB01
+GO
+
 IF OBJECT_ID('Accounting.sp_ins_tblTransactionType') IS NOT NULL
 BEGIN
 	DROP PROCEDURE Accounting.sp_ins_tblTransactionType
@@ -643,6 +692,76 @@ GO
 USE CNTDB01
 GO
 
+IF OBJECT_ID('Accounting.sp_sel_tblPeriodStatus') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Accounting.sp_sel_tblPeriodStatus
+END
+GO
+
+CREATE PROCEDURE Accounting.sp_sel_tblPeriodStatus
+	(
+	@enabled bit
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	IF @Enabled = 0
+	BEGIN
+		SELECT Name,
+			Enabled,
+			PeriodStatusId
+			FROM Accounting.tblPeriodStatus
+			ORDER BY 1
+	END
+	ELSE
+	BEGIN
+		SELECT Name,
+			PeriodStatusId
+			FROM Accounting.tblPeriodStatus
+			WHERE Enabled = 1
+			ORDER BY 1
+	END
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Accounting.sp_sel_tblPeriodStatus TO CenturiaUser
+GO
+
+USE CNTDB01
+GO
+
+IF OBJECT_ID('Accounting.sp_sel_tblPeriodStatus_detail') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Accounting.sp_sel_tblPeriodStatus_detail
+END
+GO
+
+CREATE PROCEDURE Accounting.sp_sel_tblPeriodStatus_detail
+	(
+	@PeriodStatusId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON 
+	
+	SELECT Name,
+		Enabled
+		FROM Accounting.tblPeriodStatus
+		WHERE PeriodStatusId = @PeriodStatusId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Accounting.sp_sel_tblPeriodStatus_detail TO CenturiaUser
+GO
+
+USE CNTDB01
+GO
+
 IF OBJECT_ID('Accounting.sp_sel_tblTransactionType_detail') IS NOT NULL
 BEGIN
 	DROP PROCEDURE Accounting.sp_sel_tblTransactionType_detail
@@ -837,6 +956,40 @@ RETURN 0
 GO
 
 GRANT EXECUTE ON Accounting.sp_upt_tblJournalType TO CenturiaUser
+GO
+
+USE CNTDB01
+GO
+
+IF OBJECT_ID('Accounting.sp_upt_tblPeriodStatus') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Accounting.sp_upt_tblPeriodStatus
+END
+GO
+
+CREATE PROCEDURE Accounting.sp_upt_tblPeriodStatus
+	(
+	@PeriodStatusId int,
+	@Name varchar(100),
+	@Enabled bit
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	UPDATE Accounting.tblPeriodStatus SET
+		Name = @Name,
+		SystemDate = GETDATE(),
+		Enabled = @Enabled
+		WHERE PeriodStatusId = @PeriodStatusId
+		
+	SELECT @PeriodStatusId AS PeriodStatusId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Accounting.sp_upt_tblPeriodStatus TO CenturiaUser
 GO
 
 USE CNTDB01

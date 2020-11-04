@@ -9,36 +9,29 @@ GO
 
 CREATE PROCEDURE Administrator.sp_ins_tblProfileUser
 	(
-	@UserId int,
-	@CompanyId int
+	@CompanyId int,
+	@ProfileId int,
+	@UserId int
 	)
 AS
 BEGIN
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	
-	DECLARE @ProfileId int
-	
-	BEGIN TRANSACTION
-		SELECT @ProfileId = ISNULL(MAX(ProfileId), 0) + 1
-			FROM Administrator.tblProfileUser
-			
-		INSERT INTO Administrator.tblProfileUser
-			(
-			ProfileId,
-			UserId,
-			CompanyId,
-			SystemDate
-			)
-			VALUES
-			(
-			@ProfileId,
-			@UserId,
-			@CompanyId,
-			GETDATE()
-			)
-	COMMIT TRANSACTION
-	
+
+	INSERT INTO Administrator.tblProfileUser
+		(
+		CompanyId,
+		ProfileId,
+		UserId,
+		SystemDate
+		)
+		VALUES
+		(
+		@CompanyId,
+		@ProfileId,
+		@UserId,
+		GETDATE()
+		)
+
 	SELECT @ProfileId AS ProfileId
 END
 

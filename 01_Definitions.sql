@@ -282,11 +282,11 @@ GO
 /* ---------------------------------------------------------------------- */
 
 CREATE TABLE [CNTDB00].[Administrator].[tblProfileUser] (
+    [CompanyId] INTEGER NOT NULL,
     [ProfileId] INTEGER NOT NULL,
     [UserId] INTEGER NOT NULL,
-    [CompanyId] INTEGER NOT NULL,
     [SystemDate] DATETIME NOT NULL,
-    CONSTRAINT [pk_tblProfileUser] PRIMARY KEY ([ProfileId], [UserId], [CompanyId])
+    CONSTRAINT [pk_tblProfileUser] PRIMARY KEY ([CompanyId], [ProfileId], [UserId])
 )
 GO
 

@@ -42,3 +42,9 @@ EXECUTE Administrator.sp_ins_tblSetting 1, 'RUTA DE ACTUALIZACIONES', 'Ruta util
 EXECUTE Administrator.sp_ins_tblSetting 2, 'AUTENTICACION', 'Forma de autenticarse al sistema. 0-Autenticación Windows, 1-Usuario y contraseña', 'Autentication', '0'
 GO
 
+USE CNTDB00
+GO
+
+EXECUTE Administrator.sp_ins_tblProfile 'ADMINISTRADOR'
+GO
+
