@@ -1,5 +1,5 @@
 USE CNTDB00
-GO 
+GO
 
 IF OBJECT_ID('Administrator.sp_sel_tblSetting') IS NOT NULL
 BEGIN
@@ -8,11 +8,37 @@ END
 GO
 
 CREATE PROCEDURE Administrator.sp_sel_tblSetting
+	(
+	@Enabled bit
+	)
 AS
 BEGIN
 	SET NOCOUNT ON
-
-	SELECT 1 AS SettingId
+	
+	IF @Enabled = 0
+	BEGIN
+		SELECT Name,
+			Description,
+			Variable,
+			Value,
+			Enabled,
+			SettingId,
+			ParameterId
+			FROM Administrator.tblSetting
+			ORDER BY 1
+	END
+	ELSE
+	BEGIN
+		SELECT Name,
+			Description,
+			Variable,
+			Value,
+			SettingId,
+			ParameterId
+			FROM Administrator.tblSetting
+			WHERE Enabled = 1
+			ORDER BY 1
+	END
 END
 
 RETURN 0

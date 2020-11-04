@@ -11,6 +11,8 @@ CREATE PROCEDURE Administrator.sp_upt_tblModule
 	(
 	@ModuleId int,
 	@Name varchar(100),
+	@Description varchar(MAX),
+	@Executable varchar(100),
 	@Enabled bit
 	)
 AS
@@ -19,6 +21,8 @@ BEGIN
 	
 	UPDATE Administrator.tblModule SET
 		Name = @Name,
+		Description = @Description,
+		Executable = @Executable,
 		SystemDate = GETDATE(),
 		Enabled = @Enabled
 		WHERE ModuleId = @ModuleId
