@@ -44,6 +44,3 @@ END
 RETURN 0
 GO
 
-GRANT EXECUTE ON Accounting.sp_ins_tblAccountClass TO CenturiaUser
-GO	
-
