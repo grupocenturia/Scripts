@@ -208,6 +208,7 @@ CREATE TABLE [CNTDB00].[Administrator].[tblUser] (
     [Name] VARCHAR(100) NOT NULL,
     [UserName] VARCHAR(100) NOT NULL,
     [Password] VARBINARY(max) NOT NULL,
+    [ExpirationDate] DATE NOT NULL,
     [SystemDate] DATETIME NOT NULL,
     [Enabled] BIT NOT NULL,
     CONSTRAINT [pk_tblUser] PRIMARY KEY ([UserId])

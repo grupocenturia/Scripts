@@ -17,13 +17,15 @@ BEGIN
 	SET NOCOUNT ON
 
 	DECLARE @UserId int,
-		@Name varchar(100)
+		@Name varchar(100),
+		@ExpirationDate date
 
 	OPEN SYMMETRIC KEY CenturiaKey
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
 	SELECT @UserId = UserId,
-		@Name = Name 
+		@Name = Name,
+		@ExpirationDate = ExpirationDate
 		FROM Administrator.tblUser
 		WHERE UserName COLLATE Latin1_General_CS_AS = @UserName AND
 		CAST(DECRYPTBYKEY([Password]) AS varchar) COLLATE Latin1_General_CS_AS = @Password AND
@@ -32,7 +34,9 @@ BEGIN
 	CLOSE SYMMETRIC KEY CenturiaKey
 
 	SELECT ISNULL(@UserId, 0) AS UserId,
-		ISNULL(@Name, '') AS Name
+		ISNULL(@Name, '') AS Name,
+		ISNULL(@UserName, '') AS UserName,
+		ISNULL(@ExpirationDate, GETDATE()) AS ExpirationDate
 END
 
 RETURN 0

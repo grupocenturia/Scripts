@@ -246,6 +246,52 @@ GO
 USE CNTDB00
 GO
 
+IF OBJECT_ID('Administrator.sp_ins_tblModuleLogo') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_ins_tblModuleLogo
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_ins_tblModuleLogo
+	(
+	@ModuleId int,
+	@Logo varbinary(MAX)
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+
+	BEGIN TRANSACTION
+		DELETE FROM Administrator.tblModuleLogo
+			WHERE ModuleId = @ModuleId
+
+		INSERT INTO Administrator.tblModuleLogo
+			(
+			ModuleId,
+			Logo,
+			SystemDate
+			)
+			VALUES
+			(
+			@ModuleId,
+			@Logo,
+			GETDATE()
+			)
+	COMMIT TRANSACTION
+
+	SELECT @ModuleId AS ModuleId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_ins_tblModuleLogo TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
 IF OBJECT_ID('Administrator.sp_ins_tblOption') IS NOT NULL
 BEGIN
 	DROP PROCEDURE Administrator.sp_ins_tblOption
@@ -515,8 +561,7 @@ GO
 CREATE PROCEDURE Administrator.sp_ins_tblUser
 	(
 	@Name varchar(100),
-	@UserName varchar(100),
-	@Password varchar(100)
+	@UserName varchar(100)
 	)
 AS
 BEGIN
@@ -524,12 +569,32 @@ BEGIN
 	SET XACT_ABORT ON
 
 	DECLARE @UserId int,
-		@CryptedPassword varbinary(MAX)
+		@CryptedPassword varbinary(MAX),
+		@PasswordExpiry int,
+		@ExpirationDate date
+
+	SELECT @PasswordExpiry = CASE WHEN ISNUMERIC(Value) = 0
+			THEN 0
+			ELSE CAST(Value AS int)
+			END
+		FROM Administrator.tblSetting
+		WHERE Variable = 'PasswordExpiry'
+
+	SET @PasswordExpiry = ISNULL(@PasswordExpiry, 0)
+
+	IF @PasswordExpiry = 0
+	BEGIN
+		SET @ExpirationDate = GETDATE()
+	END
+	ELSE
+	BEGIN
+		SET @ExpirationDate = DATEADD(DAY, @PasswordExpiry, GETDATE())
+	END
 
 	OPEN SYMMETRIC KEY CenturiaKey
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
-	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), @Password)
+	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), 'centuria')
 
 	CLOSE SYMMETRIC KEY CenturiaKey
 
@@ -543,6 +608,7 @@ BEGIN
 			Name,
 			UserName,
 			Password,
+			ExpirationDate,
 			SystemDate,
 			Enabled
 			)
@@ -552,6 +618,7 @@ BEGIN
 			@Name,
 			@UserName,
 			@CryptedPassword,
+			@ExpirationDate,
 			GETDATE(),
 			1
 			)
@@ -832,6 +899,34 @@ RETURN 0
 GO
 
 GRANT EXECUTE ON Administrator.sp_sel_tblModule TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblModuleLogo') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblModuleLogo
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblModuleLogo
+	(
+	@ModuleId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	SELECT Logo
+		FROM Administrator.tblModuleLogo
+		WHERE ModuleId = @ModuleId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblModuleLogo TO CenturiaUser
 GO
 
 USE CNTDB00
@@ -1205,9 +1300,10 @@ BEGIN
 
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			UserName,
-			Enabled,
+		SELECT Name AS [NOMBRE],
+			UserName AS [USUARIO],
+			ExpirationDate AS [EXPIRACION],
+			Enabled AS [ACTIVO],
 			UserId
 			FROM Administrator.tblUser
 			ORDER BY 1
@@ -1216,6 +1312,7 @@ BEGIN
 	BEGIN
 		SELECT Name,
 			UserName,
+			ExpirationDate,
 			UserId
 			FROM Administrator.tblUser
 			WHERE Enabled = 1
@@ -1256,7 +1353,8 @@ BEGIN
 		Enabled = 1
 
 	SELECT ISNULL(@UserId, 0) AS UserId,
-		ISNULL(@Name, '') AS Name
+		ISNULL(@Name, '') AS Name,
+		ISNULL(@UserName, '') AS UserName
 END
 
 RETURN 0
@@ -1284,13 +1382,15 @@ BEGIN
 	SET NOCOUNT ON
 
 	DECLARE @UserId int,
-		@Name varchar(100)
+		@Name varchar(100),
+		@ExpirationDate date
 
 	OPEN SYMMETRIC KEY CenturiaKey
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
 	SELECT @UserId = UserId,
-		@Name = Name 
+		@Name = Name,
+		@ExpirationDate = ExpirationDate
 		FROM Administrator.tblUser
 		WHERE UserName COLLATE Latin1_General_CS_AS = @UserName AND
 		CAST(DECRYPTBYKEY([Password]) AS varchar) COLLATE Latin1_General_CS_AS = @Password AND
@@ -1299,13 +1399,104 @@ BEGIN
 	CLOSE SYMMETRIC KEY CenturiaKey
 
 	SELECT ISNULL(@UserId, 0) AS UserId,
-		ISNULL(@Name, '') AS Name
+		ISNULL(@Name, '') AS Name,
+		ISNULL(@UserName, '') AS UserName,
+		ISNULL(@ExpirationDate, GETDATE()) AS ExpirationDate
 END
 
 RETURN 0
 GO
 
 GRANT EXECUTE ON Administrator.sp_sel_tblUser_checkPassword TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblUser_company') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblUser_company
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblUser_company
+	(
+	@UserId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	SELECT DISTINCT
+		tblCompany.Name,
+		tblCompany.TradeName,
+		tblCompany.ShortName,
+		tblCompany.DBName,
+		tblCompany.CompanyId
+		FROM Administrator.tblProfileUser
+		JOIN Administrator.tblCompany ON
+		tblProfileUser.CompanyId = tblCompany.CompanyId
+		JOIN Administrator.tblProfile ON
+		tblProfileUser.ProfileId = tblProfile.ProfileId
+		WHERE tblProfileUser.UserId = @UserId AND
+		tblCompany.Enabled = 1 AND
+		tblProfile.Enabled = 1
+		ORDER BY 1
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblUser_company TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblUser_companyModule') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblUser_companyModule
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblUser_companyModule
+	(
+	@UserId int,
+	@CompanyId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	SELECT DISTINCT
+		tblModule.Name,
+		tblModule.Description,
+		tblModule.Executable,
+		tblModule.ModuleId
+		FROM Administrator.tblProfileUser
+		JOIN Administrator.tblProfile ON
+		tblProfileUser.ProfileId = tblProfile.ProfileId
+		JOIN Administrator.tblProfileOption ON
+		tblProfile.ProfileId = tblProfileOption.ProfileId
+		JOIN Administrator.tblOption ON
+		tblProfileOption.OptionId = tblOption.OptionId
+		JOIN Administrator.tblMenu ON
+		tblOption.MenuId = tblMenu.MenuId
+		JOIN Administrator.tblModule ON
+		tblMenu.ModuleId = tblModule.ModuleId
+		WHERE tblProfileUser.UserId = @UserId AND
+		tblProfileUser.CompanyId = @CompanyId AND
+		tblProfile.Enabled = 1 AND
+		tblOption.Enabled = 1 AND
+		tblMenu.Enabled = 1 AND
+		tblModule.Enabled = 1
+		ORDER BY 1
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblUser_companyModule TO CenturiaUser
 GO
 
 USE CNTDB00
@@ -1647,7 +1838,27 @@ AS
 BEGIN
 	SET NOCOUNT ON
 
-	DECLARE @CryptedPassword varbinary(MAX)
+	DECLARE @CryptedPassword varbinary(MAX),
+		@PasswordExpiry int,
+		@ExpirationDate date
+
+	SELECT @PasswordExpiry = CASE WHEN ISNUMERIC(Value) = 0
+			THEN 0
+			ELSE CAST(Value AS int)
+			END
+		FROM Administrator.tblSetting
+		WHERE Variable = 'PasswordExpiry'
+
+	SET @PasswordExpiry = ISNULL(@PasswordExpiry, 0)
+
+	IF @PasswordExpiry = 0
+	BEGIN
+		SET @ExpirationDate = GETDATE()
+	END
+	ELSE
+	BEGIN
+		SET @ExpirationDate = DATEADD(DAY, @PasswordExpiry, GETDATE())
+	END
 
 	OPEN SYMMETRIC KEY CenturiaKey
 		DECRYPTION BY CERTIFICATE CenturiaCert
@@ -1656,9 +1867,9 @@ BEGIN
 
 	CLOSE SYMMETRIC KEY CenturiaKey
 
-
 	UPDATE Administrator.tblUser SET
 		Password = @CryptedPassword,
+		ExpirationDate = @ExpirationDate,
 		SystemDate = GETDATE()
 		WHERE UserId = @UserId
 

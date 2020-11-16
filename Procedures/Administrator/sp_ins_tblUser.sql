@@ -10,8 +10,7 @@ GO
 CREATE PROCEDURE Administrator.sp_ins_tblUser
 	(
 	@Name varchar(100),
-	@UserName varchar(100),
-	@Password varchar(100)
+	@UserName varchar(100)
 	)
 AS
 BEGIN
@@ -19,12 +18,32 @@ BEGIN
 	SET XACT_ABORT ON
 
 	DECLARE @UserId int,
-		@CryptedPassword varbinary(MAX)
+		@CryptedPassword varbinary(MAX),
+		@PasswordExpiry int,
+		@ExpirationDate date
+
+	SELECT @PasswordExpiry = CASE WHEN ISNUMERIC(Value) = 0
+			THEN 0
+			ELSE CAST(Value AS int)
+			END
+		FROM Administrator.tblSetting
+		WHERE Variable = 'PasswordExpiry'
+
+	SET @PasswordExpiry = ISNULL(@PasswordExpiry, 0)
+
+	IF @PasswordExpiry = 0
+	BEGIN
+		SET @ExpirationDate = GETDATE()
+	END
+	ELSE
+	BEGIN
+		SET @ExpirationDate = DATEADD(DAY, @PasswordExpiry, GETDATE())
+	END
 
 	OPEN SYMMETRIC KEY CenturiaKey
 		DECRYPTION BY CERTIFICATE CenturiaCert
 
-	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), @Password)
+	SET @CryptedPassword = ENCRYPTBYKEY(KEY_GUID('CenturiaKey'), 'centuria')
 
 	CLOSE SYMMETRIC KEY CenturiaKey
 
@@ -38,6 +57,7 @@ BEGIN
 			Name,
 			UserName,
 			Password,
+			ExpirationDate,
 			SystemDate,
 			Enabled
 			)
@@ -47,6 +67,7 @@ BEGIN
 			@Name,
 			@UserName,
 			@CryptedPassword,
+			@ExpirationDate,
 			GETDATE(),
 			1
 			)

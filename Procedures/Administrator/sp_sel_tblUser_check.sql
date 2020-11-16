@@ -25,7 +25,8 @@ BEGIN
 		Enabled = 1
 
 	SELECT ISNULL(@UserId, 0) AS UserId,
-		ISNULL(@Name, '') AS Name
+		ISNULL(@Name, '') AS Name,
+		ISNULL(@UserName, '') AS UserName
 END
 
 RETURN 0

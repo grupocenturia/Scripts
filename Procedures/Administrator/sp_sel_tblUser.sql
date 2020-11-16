@@ -17,9 +17,10 @@ BEGIN
 
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			UserName,
-			Enabled,
+		SELECT Name AS [NOMBRE],
+			UserName AS [USUARIO],
+			ExpirationDate AS [EXPIRACION],
+			Enabled AS [ACTIVO],
 			UserId
 			FROM Administrator.tblUser
 			ORDER BY 1
@@ -28,6 +29,7 @@ BEGIN
 	BEGIN
 		SELECT Name,
 			UserName,
+			ExpirationDate,
 			UserId
 			FROM Administrator.tblUser
 			WHERE Enabled = 1
