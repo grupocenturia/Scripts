@@ -9,7 +9,7 @@ GO
 
 CREATE PROCEDURE Core.sp_upt_tblLanguage
 	(
-	@Languageid int,
+	@LanguageId int,
 	@Name varchar(100),
 	@Enabled bit
 	)
@@ -17,13 +17,13 @@ AS
 BEGIN	
 	SET NOCOUNT ON
 	
-	UPDATE Core.blLanguage SET
+	UPDATE Core.tblLanguage SET
 		Name = @Name,
 		SystemDate = GETDATE(),
 		Enabled = @Enabled
-		WHERE Languageid = @Languageid
+		WHERE LanguageId = @LanguageId
 		
-	SELECT @Languageid AS Languageid
+	SELECT @LanguageId AS LanguageId
 END
 
 RETURN 0
@@ -31,3 +31,5 @@ GO
 
 GRANT EXECUTE ON Core.sp_upt_tblLanguage TO CenturiaUser
 GO
+
+

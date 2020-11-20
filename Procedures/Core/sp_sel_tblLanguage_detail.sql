@@ -17,7 +17,7 @@ BEGIN
 	
 	SELECT Name,
 	Enabled
-	FROM Core.tblLanguage_detail
+	FROM Core.tblLanguage
 	WHERE LanguageId = @LanguageId
 END
 
