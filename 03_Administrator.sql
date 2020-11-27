@@ -552,6 +552,55 @@ GO
 USE CNTDB00
 GO
 
+IF OBJECT_ID('Administrator.sp_ins_tblStore') IS NOT NULL 
+BEGIN
+	DROP PROCEDURE Administrator.sp_ins_tblStore
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_ins_tblStore
+	(
+	@Name varchar(100)
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+
+	DECLARE @StoreId int
+
+	BEGIN TRANSACTION
+		SELECT @StoreId = ISNULL(MAX(StoreId), 0) + 1
+			FROM Administrator.tblStore
+
+		INSERT INTO Administrator.tblStore
+			(
+			StoreId,
+			Name,
+			SystemDate,
+			Enabled
+			)
+			VALUES
+			(
+			@StoreId,
+			@Name,
+			GETDATE(),
+			1
+			)
+	COMMIT TRANSACTION
+
+	SELECT @StoreId AS StoreId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_ins_tblStore TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
 IF OBJECT_ID('Administrator.sp_ins_tblUser') IS NOT NULL
 BEGIN
 	DROP PROCEDURE Administrator.sp_ins_tblUser
@@ -1284,6 +1333,76 @@ GO
 USE CNTDB00
 GO
 
+IF OBJECT_ID('Administrator.sp_sel_tblStore') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblStore
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblStore
+	(
+	@Enabled bit
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	IF @Enabled = 0
+	BEGIN
+		SELECT Name,
+			Enabled,
+			StoreId
+			FROM Administrator.tblStore
+			ORDER BY 1
+	END
+	ELSE
+	BEGIN
+		SELECT Name,
+			StoreId
+			FROM Administrator.tblStore
+			WHERE Enabled = 1
+			ORDER BY 1
+	END
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblStore TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_sel_tblStore_detail') IS NOT NULL
+BEGIN
+	DROP PROCEDURE Administrator.sp_sel_tblStore_detail
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_sel_tblStore_detail
+	(
+	@StoreId int
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	SELECT Name,
+		Enabled
+		FROM Administrator.tblStore
+		WHERE StoreId = @StoreId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_sel_tblStore_detail TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
 IF OBJECT_ID('Administrator.sp_sel_tblUser') IS NOT NULL
 BEGIN
 	DROP PROCEDURE Administrator.sp_sel_tblUser
@@ -1782,6 +1901,40 @@ RETURN 0
 GO
 
 GRANT EXECUTE ON Administrator.sp_upt_tblProfile TO CenturiaUser
+GO
+
+USE CNTDB00
+GO
+
+IF OBJECT_ID('Administrator.sp_upt_tblStore') IS NOT NULL 
+BEGIN
+	DROP PROCEDURE Administrator.sp_upt_tblStore
+END
+GO
+
+CREATE PROCEDURE Administrator.sp_upt_tblStore
+	(
+	@StoreId int,
+	@Name varchar(100),
+	@Enabled bit
+	)
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	UPDATE Administrator.tblStore SET
+		Name = @Name,
+		SystemDate = GETDATE(),
+		Enabled = @Enabled
+		WHERE StoreId = @StoreId
+
+	SELECT @StoreId AS StoreId
+END
+
+RETURN 0
+GO
+
+GRANT EXECUTE ON Administrator.sp_upt_tblStore TO CenturiaUser
 GO
 
 USE CNTDB00
