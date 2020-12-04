@@ -17,11 +17,11 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			TradeName,
-			ShortName,
-			DBName,
-			Enabled,
+		SELECT Name AS [NOMBRE DE COMPAÑIA],
+			TradeName AS [NOMBRE COMERCIAL],
+			ShortName AS [NOMBRE CORTO],
+			DBName AS [BASE DE DATOS],
+			Enabled AS [ACTIVO],
 			CompanyId
 			FROM Administrator.tblCompany
 			ORDER BY 1
