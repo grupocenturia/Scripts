@@ -327,7 +327,7 @@ BEGIN
 	SELECT Name,
 	IsoCode,
 	Enabled
-	FROM Core.tblCountry_detail
+	FROM Core.tblCountry
 	WHERE CountryId = @CountryId
 END
 

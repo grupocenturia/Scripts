@@ -17,10 +17,10 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			IsoCode,
-			Symbol,
-			Enabled,
+		SELECT Name AS [NOMBRE],
+			IsoCode AS [CODIGO],
+			Symbol  AS [SIMBOLO],
+			Enabled AS [ACTIVO],
 			CurrencyId
 			FROM Core.tblCurrency
 			ORDER BY 1

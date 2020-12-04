@@ -17,9 +17,9 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			Enabled,
-			IsoCode,
+		SELECT Name AS [NOMBRE],		
+			IsoCode AS [CODIGO],
+			Enabled AS [ACTIVO],
 			CountryId
 			FROM Core.tblCountry
 			ORDER BY 1

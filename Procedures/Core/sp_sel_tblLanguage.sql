@@ -17,8 +17,8 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			Enabled,
+		SELECT Name AS[NOMBRE],
+			Enabled AS[ACTIVO],
 			LanguageId
 			FROM Core.tblLanguage
 			ORDER BY 1
