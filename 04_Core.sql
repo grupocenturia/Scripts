@@ -283,9 +283,9 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			Enabled,
-			IsoCode,
+		SELECT Name AS [NOMBRE],		
+			IsoCode AS [CODIGO],
+			Enabled AS [ACTIVO],
 			CountryId
 			FROM Core.tblCountry
 			ORDER BY 1
@@ -356,10 +356,10 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			IsoCode,
-			Symbol,
-			Enabled,
+		SELECT Name AS [NOMBRE],
+			IsoCode AS [CODIGO],
+			Symbol  AS [SIMBOLO],
+			Enabled AS [ACTIVO],
 			CurrencyId
 			FROM Core.tblCurrency
 			ORDER BY 1
@@ -432,8 +432,8 @@ BEGIN
 
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			Enabled,
+		SELECT Name AS [NOMBRE],
+			Enabled AS [ACTIVO],
 			DataTypeId
 			FROM Core.tblDataType
 			ORDER BY 1
@@ -502,8 +502,8 @@ BEGIN
 	
 	IF @Enabled = 0
 	BEGIN
-		SELECT Name,
-			Enabled,
+		SELECT Name AS[NOMBRE],
+			Enabled AS[ACTIVO],
 			LanguageId
 			FROM Core.tblLanguage
 			ORDER BY 1
